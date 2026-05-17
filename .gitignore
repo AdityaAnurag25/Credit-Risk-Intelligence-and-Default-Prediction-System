@@ -28,6 +28,14 @@ env/
 .vscode/
 
 # --------------------------------------------------
+# Dashboard Exports
+# --------------------------------------------------
+dashboard/data_exports/*
+
+# Keep Folder Structure
+!dashboard/data_exports/.gitkeep
+
+# --------------------------------------------------
 # Data Files
 # --------------------------------------------------
 data/raw/*
