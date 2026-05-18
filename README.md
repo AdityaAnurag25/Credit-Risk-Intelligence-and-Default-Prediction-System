@@ -353,5 +353,4 @@ Planned future improvements:
 # Disclaimer
 
 This project is developed for educational and analytical purposes using publicly available lending data.
-
 It does not represent production lending advice or financial recommendations.
