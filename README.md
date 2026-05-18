@@ -6,31 +6,34 @@ This project focuses on building an end-to-end credit risk analytics and default
 
 The objective is to analyze borrower risk characteristics, identify patterns associated with loan default, and develop predictive models that support data-driven lending and portfolio risk decisions.
 
-The system combines:
-- Data cleaning and validation
-- Feature engineering
+The project combines:
+- Data engineering
+- Exploratory risk analytics
+- Financial feature engineering
+- Machine learning-based default prediction
 - Risk segmentation
-- Predictive modeling
-- Portfolio analytics
-- Dashboard-based reporting
+- SQL analytics
+- Business intelligence reporting
 
 ---
 
 # Business Problem
 
-Financial institutions issue large volumes of consumer loans with varying levels of borrower risk.
+Financial institutions issue large volumes of consumer loans with varying borrower risk profiles.
 
-Poor credit risk assessment can result in:
+Ineffective credit risk assessment can result in:
 - Increased default rates
 - Higher portfolio losses
-- Reduced lending efficiency
+- Reduced underwriting efficiency
 - Elevated financial exposure
+- Poor portfolio quality
 
-This project aims to develop a structured analytics system capable of:
-- Predicting probability of default
-- Identifying high-risk borrower segments
-- Supporting lending decision analysis
-- Monitoring portfolio-level risk exposure
+This project develops a structured analytics system capable of:
+- Predicting borrower default probability
+- Segmenting borrowers by risk level
+- Supporting lending decision workflows
+- Monitoring portfolio-level exposure
+- Generating actionable risk intelligence
 
 ---
 
@@ -38,16 +41,18 @@ This project aims to develop a structured analytics system capable of:
 
 ## Source
 LendingClub Loan Dataset
+(https://www.kaggle.com/datasets/adarshsng/lending-club-loan-data-csv)
 
 ## Dataset Characteristics
-The dataset contains historical consumer lending data including:
-- Borrower financial attributes
-- Credit history information
-- Loan application characteristics
-- Loan performance outcomes
-- Loan status labels
 
-## Example Features
+The dataset contains historical consumer lending data including:
+- Borrower financial information
+- Credit history attributes
+- Loan application characteristics
+- Lending outcomes
+- Loan performance labels
+
+### Example Features
 - Loan Amount
 - Interest Rate
 - Annual Income
@@ -59,11 +64,13 @@ The dataset contains historical consumer lending data including:
 - Home Ownership
 - Credit Grade
 
-## Target Variable
+---
+
+# Target Variable
 
 Loan Status:
-- Fully Paid → Good Loan
-- Charged Off → Bad Loan
+- Fully Paid → Good Loan (0)
+- Charged Off → Bad Loan (1)
 
 ---
 
@@ -72,28 +79,167 @@ Loan Status:
 - Build a structured credit risk analytics pipeline
 - Perform borrower-level risk analysis
 - Engineer predictive financial risk features
-- Train and evaluate default prediction models
-- Develop portfolio monitoring dashboards
-- Generate actionable lending risk insights
+- Train and evaluate multiple ML models
+- Develop borrower risk scoring logic
+- Create lending decision-support frameworks
+- Build portfolio monitoring dashboards
+- Generate operational risk insights
 
 ---
 
-# Planned System Architecture
+# Current Project Status
+
+## Completed
+
+### Data Engineering
+- Dataset ingestion and validation
+- Missing value analysis
+- Data quality auditing
+- Target variable creation
+- Structured preprocessing pipeline
+
+### Exploratory Data Analysis
+- Default trend analysis
+- Borrower segmentation analysis
+- Portfolio distribution analysis
+- Loan purpose risk analysis
+- Credit grade default analysis
+- Financial risk behavior analysis
+
+### Feature Engineering
+
+Engineered risk-focused features including:
+- Income-to-loan ratio
+- Installment-to-income ratio
+- Credit exposure score
+- Employment stability indicators
+- Delinquency segmentation
+- Inquiry risk segmentation
+- Revolving balance exposure metrics
+
+### Predictive Modeling
+
+Implemented and evaluated:
+- Logistic Regression
+- Random Forest
+- XGBoost
+
+### Model Evaluation
+
+Completed:
+- ROC-AUC evaluation
+- Precision / Recall analysis
+- F1-score analysis
+- ROC curve comparison
+- Feature importance analysis
+- Risk band segmentation
+- Threshold optimization
+- Portfolio decision analysis
+
+### Risk Segmentation Framework
+
+Developed:
+- Borrower risk scoring system
+- Risk bands:
+  - Very Low Risk
+  - Low Risk
+  - Medium Risk
+  - High Risk
+  - Very High Risk
+
+### Lending Decision Framework
+
+Implemented operational decision logic:
+- Approve
+- Manual Review
+- Reject
+
+based on probability-of-default thresholds.
+
+### SQL Analytics Layer
+
+Implemented:
+- PostgreSQL integration
+- Portfolio analytics queries
+- Borrower risk analysis queries
+- Default segmentation analysis
+- Exposure monitoring queries
+
+---
+
+# Model Performance Summary
+
+## Final Selected Model
+XGBoost Classifier
+
+### Performance Metrics
+- ROC-AUC: ~0.82
+- Accuracy: ~84%
+- Strong portfolio risk separation capability
+
+### Key Predictive Features
+
+Top drivers of default risk:
+- Credit Grade
+- Sub Grade
+- Interest Rate
+- Debt-to-Income Ratio
+- Installment Burden
+- Credit Exposure Metrics
+
+---
+
+# Risk Segmentation Results
+
+Observed portfolio default rates:
+
+| Risk Band | Approx. Default Rate |
+|---|---|
+| Very Low Risk | ~11% |
+| Low Risk | ~28% |
+| Medium Risk | ~48% |
+| High Risk | ~69% |
+| Very High Risk | ~94% |
+
+The segmentation framework demonstrated strong borrower risk separation capability.
+
+---
+
+# Decision Framework Results
+
+| Decision | Observed Default Rate |
+|---|---|
+| Approve | ~11% |
+| Manual Review | ~31% |
+| Reject | ~61% |
+
+The decision framework successfully differentiated:
+- low-risk borrowers,
+- moderate-risk applicants,
+- and high-risk lending candidates.
+
+---
+
+# System Architecture
 
 ```text
-Raw Loan Data
-      ↓
+Raw Lending Data
+        ↓
 Data Cleaning & Validation
-      ↓
+        ↓
+Exploratory Risk Analysis
+        ↓
 Feature Engineering
-      ↓
-Risk Segmentation
-      ↓
+        ↓
 Predictive Modeling
-      ↓
-Risk Scoring
-      ↓
-Dashboard & Reporting
+        ↓
+Probability of Default Estimation
+        ↓
+Risk Segmentation
+        ↓
+Decision Framework
+        ↓
+SQL Analytics & Dashboard Reporting
 ```
 
 ---
@@ -105,10 +251,12 @@ Dashboard & Reporting
 - Pandas
 - NumPy
 - Scikit-learn
+- XGBoost
 
 ## Database & Querying
-- SQL
 - PostgreSQL
+- SQLAlchemy
+- SQL
 
 ## Visualization & Reporting
 - Power BI
@@ -125,110 +273,80 @@ Dashboard & Reporting
 # Repository Structure
 
 ```text
-Credit-Risk-Intelligence-Default-Prediction-System/
+Credit-Risk-Intelligence-and-Default-Prediction-System/
 │
 ├── data/
+│   ├── raw/
+│   └── processed/
+│
 ├── notebooks/
-├── sql/
-├── src/
-├── dashboard/
-├── reports/
+│
 ├── outputs/
+│   ├── figures/
+│   └── predictions/
+│
+├── sql/
+│
+├── src/
+│
+├── dashboard/
+│
+├── reports/
+│
+├── models/
+│
 ├── requirements.txt
+│
 └── README.md
 ```
 
 ---
 
-# Planned Workflow
+# SQL Analytics Implemented
 
-## 1. Data Engineering
-- Dataset ingestion
-- Data validation
-- Missing value handling
-- SQL schema creation
-- Structured preprocessing
-
-## 2. Exploratory Risk Analysis
-- Default trend analysis
-- Borrower segmentation
-- Portfolio distribution analysis
-- Risk concentration analysis
-
-## 3. Feature Engineering
-- Credit burden indicators
-- Borrower stability metrics
-- Financial exposure measures
-- Risk segmentation features
-
-## 4. Predictive Modeling
-Planned models:
-- Logistic Regression
-- Random Forest
-- Gradient Boosting
-
-## 5. Model Evaluation
-Planned evaluation metrics:
-- ROC-AUC
-- Precision / Recall
-- F1 Score
-- Confusion Matrix
-- Risk Decile Analysis
-
-## 6. Dashboard & Reporting
-Interactive analytics dashboards for:
-- Portfolio monitoring
-- Default trends
-- Risk segmentation
-- Borrower risk tracking
+Implemented portfolio analytics queries for:
+- Default rate by credit grade
+- Loan purpose risk analysis
+- Risk band portfolio distribution
+- Borrower exposure analysis
+- Home ownership risk segmentation
+- Portfolio exposure monitoring
+- DTI-based risk analysis
 
 ---
 
-# Current Development Status
+# Dashboard Development (In Progress)
 
-## Completed
-- Project planning
-- Repository setup
-- System architecture design
-- Workflow definition
-
-## In Progress
-- Dataset ingestion
-- Data cleaning pipeline
-- Exploratory analysis
-- SQL schema implementation
-
-## Planned
-- Feature engineering
-- Predictive modeling
-- Dashboard development
-- Risk scoring framework
-- Final reporting
+Planned Power BI dashboards include:
+- Executive Portfolio Overview
+- Borrower Risk Analytics
+- Model Performance Monitoring
+- Decision Framework Analytics
 
 ---
 
-# Key Learning Areas
+# Key Business Insights
 
-This project is designed to strengthen practical understanding of:
-- Credit risk analytics
-- Financial data preprocessing
-- Predictive modeling
-- SQL-based analytics workflows
-- Business intelligence reporting
-- Risk segmentation techniques
-- Decision-support analytics systems
+Key findings from the analysis include:
+- Higher credit grades exhibit materially lower default risk
+- Interest rate strongly correlates with borrower risk
+- High debt-to-income borrowers show elevated default probability
+- Risk segmentation effectively separates borrower quality
+- Threshold optimization improves operational lending decisions
+- Portfolio concentration risk can be monitored through borrower segmentation
 
 ---
 
 # Future Enhancements
 
-Potential future improvements:
-- Real-time risk scoring API
+Planned future improvements:
+- Real-time scoring API
 - Automated reporting pipelines
 - Model explainability integration
 - Approval recommendation engine
-- Model drift monitoring
-- Ensemble-based risk modeling
+- Model monitoring & drift tracking
+- Ensemble risk scoring framework
+- Cloud deployment pipeline
 
 ---
 
