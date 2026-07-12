@@ -259,7 +259,7 @@ SQL Analytics & Dashboard Reporting
 - SQL
 
 ## Visualization & Reporting
-- Power BI
+- Streamlit
 - Matplotlib
 - Seaborn
 
@@ -317,7 +317,7 @@ Implemented portfolio analytics queries for:
 
 # Dashboard Development (In Progress)
 
-Planned Power BI dashboards include:
+Planned Streamlit dashboards include:
 - Executive Portfolio Overview
 - Borrower Risk Analytics
 - Model Performance Monitoring
