@@ -350,6 +350,31 @@ Planned future improvements:
 
 ---
 
+# Local Development Setup
+
+## Notebook Output Stripping
+
+Notebooks in this repo should never carry committed cell outputs — diffs on a multi-million-row pipeline get
+unreadable fast, and outputs can leak data samples into git history. `nbstripout` is included as a dev
+dependency; after cloning, run once:
+
+```bash
+uv sync
+uv run nbstripout --install
+```
+
+This registers a git filter local to this clone (via `.git/config`) that strips notebook outputs
+automatically on every `git add`/`commit` — nothing to remember to run by hand afterward. It's independent
+of the `pre-commit` framework; no `.pre-commit-config.yaml` is set up yet.
+
+To check whether a notebook currently has stripped output without staging it:
+
+```bash
+uv run nbstripout --verify notebooks/*.ipynb
+```
+
+---
+
 # Disclaimer
 
 This project is developed for educational and analytical purposes using publicly available lending data.

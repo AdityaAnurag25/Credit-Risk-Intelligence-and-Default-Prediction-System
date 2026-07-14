@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     processed_data_dir: Path = project_root / "data" / "processed"
     models_dir: Path = project_root / "models"
     outputs_dir: Path = project_root / "outputs"
+    dashboard_export_dir: Path = project_root / "dashboard" / "data_exports"
 
     random_seed: int = 42
 
