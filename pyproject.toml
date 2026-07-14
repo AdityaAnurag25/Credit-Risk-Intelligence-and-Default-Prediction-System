@@ -1,0 +1,27 @@
+[project]
+name = "credit-risk-intelligence"
+version = "0.1.0"
+description = "Credit risk analytics and default prediction system for LendingClub loan data"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=3.0",
+    "numpy>=2.4",
+    "scikit-learn>=1.8",
+    "xgboost>=3.2",
+    "sqlalchemy>=2.0",
+    "psycopg2-binary>=2.9",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ipykernel>=7.2",
+    "jupyterlab>=4.5",
+]
