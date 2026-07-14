@@ -2,12 +2,12 @@ import argparse
 import logging
 
 import joblib
-from sklearn.model_selection import train_test_split
 
 from credit_risk.config import settings
 from credit_risk.data import clean_and_label, drop_leaky_columns, load_raw_data
 from credit_risk.features import build_features
 from credit_risk.models import evaluate, prepare_model_matrix
+from credit_risk.validation import per_vintage_auc, time_based_split
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -22,41 +22,65 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=str(settings.raw_data_path),
         help="Path to raw loan.csv.",
     )
-    parser.add_argument("--test-size", type=float, default=0.2)
+    parser.add_argument(
+        "--train-frac", type=float, default=0.7, help="Fraction of vintages used for training."
+    )
+    parser.add_argument(
+        "--val-frac", type=float, default=0.15, help="Fraction of vintages held out for validation."
+    )
     return parser.parse_args(argv)
 
 
-def run(model_path: str, data_path: str, test_size: float) -> dict:
+def run(model_path: str, data_path: str, train_frac: float, val_frac: float) -> dict:
     logger.info("Loading model from %s", model_path)
     model = joblib.load(model_path)
 
-    logger.info("Rebuilding the holdout split from %s", data_path)
+    logger.info("Rebuilding the time-based holdout split from %s", data_path)
     df = load_raw_data(data_path)
     df = clean_and_label(df)
     df = drop_leaky_columns(df)
     df = build_features(df)
 
-    # Reproduces the holdout split rather than persisting one, so this only lines up with the
-    # model's actual training split if --test-size and settings.random_seed match what was used
-    # for training. There's no split ID stored alongside the saved model to verify this against.
-    X, y = prepare_model_matrix(df, target_column=settings.target_column)
-    _, X_test, _, y_test = train_test_split(
-        X,
-        y,
-        test_size=test_size,
-        random_state=settings.random_seed,
-        stratify=y,
+    # Reproduces the split rather than persisting one, so this only lines up with the model's
+    # actual training split if --train-frac/--val-frac match what was used for training. There's
+    # no split ID stored alongside the saved model to verify this against.
+    split = time_based_split(
+        df, date_column=settings.issue_date_column, train_frac=train_frac, val_frac=val_frac
     )
+    logger.info(
+        "Vintage boundaries — train: %s to %s | val: %s to %s | test: %s to %s",
+        split.train_start.date(),
+        split.train_end.date(),
+        split.val_start.date(),
+        split.val_end.date(),
+        split.test_start.date(),
+        split.test_end.date(),
+    )
+
+    X, y = prepare_model_matrix(df, target_column=settings.target_column)
+    X_test, y_test = X.loc[split.test_index], y.loc[split.test_index]
 
     logger.info("Evaluating on %d holdout rows", len(X_test))
     metrics = evaluate(model, X_test, y_test)
     logger.info("Metrics: %s", metrics)
+
+    test_dates = df.loc[split.test_index, settings.issue_date_column]
+    y_prob = model.predict_proba(X_test)[:, 1]
+    vintage_auc = per_vintage_auc(test_dates, y_test, y_prob)
+    logger.info("Per-vintage AUC (test set):\n%s", vintage_auc.to_string())
+    metrics["per_vintage_auc"] = vintage_auc.to_dict()
+
     return metrics
 
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
-    run(model_path=args.model_path, data_path=args.data_path, test_size=args.test_size)
+    run(
+        model_path=args.model_path,
+        data_path=args.data_path,
+        train_frac=args.train_frac,
+        val_frac=args.val_frac,
+    )
 
 
 if __name__ == "__main__":
