@@ -46,4 +46,4 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM"]
 
 [tool.ruff.lint.pep8-naming]
 # X / y is sklearn's own convention (fit(X, y), predict(X), ...), not a naming mistake.
-extend-ignore-names = ["X", "X_train", "X_test"]
+extend-ignore-names = ["X", "X_train", "X_val", "X_test"]

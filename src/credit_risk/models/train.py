@@ -105,7 +105,7 @@ def _build_random_forest() -> RandomForestClassifier:
     )
 
 
-def _build_xgboost() -> XGBClassifier:
+def _build_xgboost(scale_pos_weight: float = 1.0) -> XGBClassifier:
     return XGBClassifier(
         n_estimators=100,
         max_depth=6,
@@ -113,6 +113,7 @@ def _build_xgboost() -> XGBClassifier:
         subsample=0.8,
         colsample_bytree=0.8,
         random_state=settings.random_seed,
+        scale_pos_weight=scale_pos_weight,
     )
 
 
@@ -123,14 +124,30 @@ MODEL_BUILDERS = {
 }
 
 
+def compute_scale_pos_weight(y_train: pd.Series) -> float:
+    """Compute XGBoost's `scale_pos_weight` as the negative-to-positive class ratio.
+
+    Returns 1.0 (no reweighting) if there are no positive examples, since the
+    ratio is undefined and XGBoost requires a finite value.
+    """
+    class_counts = y_train.value_counts()
+    negative = class_counts.get(0, 0)
+    positive = class_counts.get(1, 0)
+    if positive == 0:
+        return 1.0
+    return negative / positive
+
+
 def train(X_train: pd.DataFrame, y_train: pd.Series, model_name: str):
-    try:
-        builder = MODEL_BUILDERS[model_name]
-    except KeyError as exc:
+    if model_name not in MODEL_BUILDERS:
         raise ValueError(
             f"Unknown model_name {model_name!r}. Choose from: {sorted(MODEL_BUILDERS)}"
-        ) from exc
+        )
 
-    model = builder()
+    if model_name == "xgboost":
+        model = _build_xgboost(scale_pos_weight=compute_scale_pos_weight(y_train))
+    else:
+        model = MODEL_BUILDERS[model_name]()
+
     model.fit(X_train, y_train)
     return model

@@ -3,11 +3,18 @@ import logging
 from datetime import datetime, timezone
 
 import joblib
+from sklearn.metrics import brier_score_loss
 
 from credit_risk.config import settings
 from credit_risk.data import clean_and_label, drop_leaky_columns, load_raw_data
 from credit_risk.features import build_features
-from credit_risk.models import evaluate, prepare_model_matrix, train
+from credit_risk.models import (
+    evaluate,
+    fit_isotonic_calibration,
+    plot_calibration_curve,
+    prepare_model_matrix,
+    train,
+)
 from credit_risk.validation import per_vintage_auc, time_based_split
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -72,6 +79,7 @@ def run(model_name: str, data_path: str, train_frac: float, val_frac: float) -> 
     X, y = prepare_model_matrix(df, target_column=settings.target_column)
 
     X_train, y_train = X.loc[split.train_index], y.loc[split.train_index]
+    X_val, y_val = X.loc[split.val_index], y.loc[split.val_index]
     X_test, y_test = X.loc[split.test_index], y.loc[split.test_index]
 
     logger.info("Training %s on %d rows", model_name, len(X_train))
@@ -86,6 +94,24 @@ def run(model_name: str, data_path: str, train_frac: float, val_frac: float) -> 
     vintage_auc = per_vintage_auc(test_dates, y_test, y_prob)
     logger.info("Per-vintage AUC (test set):\n%s", vintage_auc.to_string())
     metrics["per_vintage_auc"] = vintage_auc.to_dict()
+
+    logger.info("Calibrating on %d validation rows", len(X_val))
+    calibrated_model = fit_isotonic_calibration(model, X_val, y_val)
+    y_prob_calibrated = calibrated_model.predict_proba(X_test)[:, 1]
+
+    brier_raw = brier_score_loss(y_test, y_prob)
+    brier_calibrated = brier_score_loss(y_test, y_prob_calibrated)
+    logger.info("Brier score — raw: %.4f | isotonic-calibrated: %.4f", brier_raw, brier_calibrated)
+    metrics["brier_score_raw"] = brier_raw
+    metrics["brier_score_calibrated"] = brier_calibrated
+
+    figure_path = settings.outputs_dir / "figures" / f"calibration_{model_name}.png"
+    plot_calibration_curve(
+        y_test,
+        {"uncalibrated": y_prob, "isotonic": y_prob_calibrated},
+        output_path=figure_path,
+    )
+    logger.info("Saved calibration curve to %s", figure_path)
 
     models_dir = settings.outputs_dir / "models"
     models_dir.mkdir(parents=True, exist_ok=True)
