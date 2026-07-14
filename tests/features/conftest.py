@@ -1,0 +1,66 @@
+import numpy as np
+import pandas as pd
+import pytest
+
+
+@pytest.fixture
+def raw_features_df() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "annual_inc": [
+                60000, 0, np.nan, 45000, 30000,
+                80000, 55000, 40000, 90000, 35000,
+                70000, 25000,
+            ],
+            "loan_amnt": [
+                10000, 5000, 3000, 12000, 2000,
+                20000, 8000, 15000, 25000, 6000,
+                18000, 4000,
+            ],
+            "revol_util": [
+                45, 20, np.nan, 55, 10,
+                75, 90, 60, 30, 15,
+                85, 5,
+            ],
+            "dti": [
+                18, 10, np.nan, 999, 5,
+                25, 30, 22, 8, 12,
+                28, 3,
+            ],
+            "emp_length": [
+                "5 years", "3 years", np.nan, "10+ years", "< 1 year",
+                "2 years", "7 years", "1 year", "9 years", "4 years",
+                "6 years", "8 years",
+            ],
+            "issue_d": [
+                "Jan-2019", "Feb-2019", np.nan, "Mar-2019", "Apr-2019",
+                "May-2019", "Jun-2019", "Jul-2019", "Aug-2019", "Sep-2019",
+                "Oct-2019", "Nov-2019",
+            ],
+            "earliest_cr_line": [
+                "Jan-2010", "Feb-2015", np.nan, "Mar-2005", "Apr-2018",
+                "May-2008", "Jun-2012", "Jul-2011", "Aug-2003", "Sep-2016",
+                "Oct-2009", "Nov-2017",
+            ],
+            "inq_last_6mths": [
+                2, 1, np.nan, 3, 0,
+                5, 4, 6, 1, 2,
+                7, 0,
+            ],
+            "delinq_2yrs": [
+                1, 0, np.nan, 2, 0,
+                3, 4, 5, 0, 1,
+                6, 0,
+            ],
+            "revol_bal": [
+                4000, 1000, np.nan, 6000, 300,
+                15000, 7000, 9000, 5000, 1200,
+                12000, 200,
+            ],
+            "installment": [
+                320, 150, 90, 400, 60,
+                650, 250, 480, 700, 180,
+                550, 130,
+            ],
+        }
+    )
