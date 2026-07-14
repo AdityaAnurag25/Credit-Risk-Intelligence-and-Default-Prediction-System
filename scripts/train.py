@@ -6,7 +6,7 @@ import joblib
 from sklearn.model_selection import train_test_split
 
 from credit_risk.config import settings
-from credit_risk.data import clean_and_label, load_raw_data
+from credit_risk.data import clean_and_label, drop_leaky_columns, load_raw_data
 from credit_risk.features import build_features
 from credit_risk.models import evaluate, prepare_model_matrix, train
 
@@ -35,6 +35,9 @@ def run(model_name: str, data_path: str, test_size: float) -> dict:
 
     logger.info("Cleaning and labeling %d rows", len(df))
     df = clean_and_label(df)
+
+    logger.info("Dropping leaky columns")
+    df = drop_leaky_columns(df)
 
     logger.info("Building features on %d rows", len(df))
     df = build_features(df)

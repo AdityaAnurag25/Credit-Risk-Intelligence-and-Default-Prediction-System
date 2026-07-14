@@ -5,7 +5,7 @@ import joblib
 from sklearn.model_selection import train_test_split
 
 from credit_risk.config import settings
-from credit_risk.data import clean_and_label, load_raw_data
+from credit_risk.data import clean_and_label, drop_leaky_columns, load_raw_data
 from credit_risk.features import build_features
 from credit_risk.models import evaluate, prepare_model_matrix
 
@@ -33,6 +33,7 @@ def run(model_path: str, data_path: str, test_size: float) -> dict:
     logger.info("Rebuilding the holdout split from %s", data_path)
     df = load_raw_data(data_path)
     df = clean_and_label(df)
+    df = drop_leaky_columns(df)
     df = build_features(df)
 
     # Reproduces the holdout split rather than persisting one, so this only lines up with the
