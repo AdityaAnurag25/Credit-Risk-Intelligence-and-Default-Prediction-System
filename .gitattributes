@@ -1,0 +1,48 @@
+# --------------------------------------------------
+# Default: normalize text files to LF
+# --------------------------------------------------
+* text=auto eol=lf
+
+# --------------------------------------------------
+# Explicit text types
+# --------------------------------------------------
+*.py    text eol=lf
+*.md    text eol=lf
+*.sql   text eol=lf
+*.txt   text eol=lf
+*.toml  text eol=lf
+*.cfg   text eol=lf
+*.ini   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.sh    text eol=lf
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+
+# --------------------------------------------------
+# Notebooks: treat as text for diffing, but force LF
+# (JSON-based; CRLF inside them causes noisy diffs)
+# --------------------------------------------------
+*.ipynb text eol=lf
+
+# --------------------------------------------------
+# Binary: never touch, never diff as text
+# --------------------------------------------------
+*.pkl     binary
+*.joblib  binary
+*.h5      binary
+*.db      binary
+*.sqlite3 binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.pdf     binary
+*.xlsx    binary
+*.parquet binary
+
+# --------------------------------------------------
+# Data files: binary to avoid line-ending churn on large CSVs
+# --------------------------------------------------
+data/**/*.csv    binary
+outputs/**/*.csv binary
