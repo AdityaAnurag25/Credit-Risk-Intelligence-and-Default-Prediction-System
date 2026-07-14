@@ -20,7 +20,7 @@ EXPECTED_NEW_COLUMNS = {
 
 def test_build_features_adds_all_expected_columns(raw_features_df: pd.DataFrame):
     out = build_features(raw_features_df)
-    assert EXPECTED_NEW_COLUMNS <= set(out.columns)
+    assert set(out.columns) >= EXPECTED_NEW_COLUMNS
 
 
 def test_build_features_preserves_row_count(raw_features_df: pd.DataFrame):

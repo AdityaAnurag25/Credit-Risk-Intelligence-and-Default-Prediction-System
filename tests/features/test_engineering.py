@@ -5,6 +5,7 @@ from credit_risk.features.engineering import (
     add_credit_exposure_score,
     add_credit_history_years,
     add_delinquency_risk,
+    add_dti_bucket,
     add_employment_stability,
     add_income_to_loan_ratio,
     add_inquiry_risk_bucket,
@@ -12,7 +13,6 @@ from credit_risk.features.engineering import (
     add_loan_size_bucket,
     add_revol_bal_to_income,
     add_revol_util_bucket,
-    add_dti_bucket,
 )
 
 ZERO_INCOME_ROW = 1
@@ -123,7 +123,10 @@ def test_loan_size_bucket_assigns_all_rows(raw_features_df: pd.DataFrame):
     out = add_loan_size_bucket(raw_features_df)
     assert out["loan_size_bucket"].notna().all()
     assert set(out["loan_size_bucket"].cat.categories) == {
-        "small", "medium", "large", "very_large",
+        "small",
+        "medium",
+        "large",
+        "very_large",
     }
 
 

@@ -1,3 +1,5 @@
+import contextlib
+
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
@@ -9,7 +11,7 @@ from xgboost import XGBClassifier
 from credit_risk.config import settings
 
 # Mirrors notebooks/05_model_training.ipynb cell dc2cadd3 exactly. This is
-# today's leakage exposure, not a corrected one — see CLAUDE.md Phase 2.
+# today's leakage exposure, not a corrected one — a full leakage audit is separate follow-up work.
 DROP_COLUMNS: tuple[str, ...] = (
     # Target leakage / post-loan servicing
     "loan_status",
@@ -64,10 +66,8 @@ def prepare_model_matrix(df: pd.DataFrame, target_column: str) -> tuple[pd.DataF
     for col in df.columns:
         if col == target_column:
             continue
-        try:
+        with contextlib.suppress(ValueError, TypeError):
             df[col] = pd.to_numeric(df[col])
-        except (ValueError, TypeError):
-            pass
 
     for col in df.columns:
         if col == target_column:

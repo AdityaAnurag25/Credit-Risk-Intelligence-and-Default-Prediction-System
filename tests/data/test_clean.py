@@ -18,7 +18,13 @@ def test_target_mapping_correctness(raw_loans_df: pd.DataFrame):
 def test_non_target_statuses_are_dropped(raw_loans_df: pd.DataFrame):
     cleaned = clean_and_label(raw_loans_df)
 
-    dropped_statuses = {"Current", "Late (31-120 days)", "Late (16-30 days)", "In Grace Period", "Default"}
+    dropped_statuses = {
+        "Current",
+        "Late (31-120 days)",
+        "Late (16-30 days)",
+        "In Grace Period",
+        "Default",
+    }
 
     assert set(cleaned["loan_status"].unique()) == set(TARGET_STATUSES)
     assert dropped_statuses.isdisjoint(cleaned["loan_status"].unique())

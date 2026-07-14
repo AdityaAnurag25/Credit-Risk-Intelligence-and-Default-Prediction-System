@@ -4,6 +4,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
 
 # --------------------------------------------------
 # Virtual Environment
@@ -54,12 +55,14 @@ outputs/models/*
 outputs/figures/*
 outputs/metrics/*
 outputs/predictions/*
+outputs/monitoring/*
 
 # Keep folder structure
 !outputs/models/.gitkeep
 !outputs/figures/.gitkeep
 !outputs/metrics/.gitkeep
 !outputs/predictions/.gitkeep
+!outputs/monitoring/.gitkeep
 
 # --------------------------------------------------
 # Model Files
@@ -99,9 +102,10 @@ htmlcov/
 .pytest_cache/
 
 # --------------------------------------------------
-# MyPy
+# Linting / Type Checking
 # --------------------------------------------------
 .mypy_cache/
+.ruff_cache/
 
 # --------------------------------------------------
 # Power BI

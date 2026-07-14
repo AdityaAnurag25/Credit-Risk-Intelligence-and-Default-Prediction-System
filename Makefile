@@ -1,6 +1,7 @@
-.PHONY: install lint test train
+.PHONY: install lint format test train evaluate clean
 
 MODEL ?= xgboost
+MODEL_PATH ?=
 
 install:
 	uv sync
@@ -8,8 +9,18 @@ install:
 lint:
 	uv run ruff check .
 
+format:
+	uv run ruff format .
+
 test:
 	uv run pytest
 
 train:
 	uv run python scripts/train.py --model $(MODEL)
+
+evaluate:
+	uv run python scripts/evaluate.py --model-path $(MODEL_PATH)
+
+clean:
+	find . -type d -name "__pycache__" -not -path "./.venv/*" -not -path "./venv/*" -exec rm -rf {} +
+	rm -rf .pytest_cache .ruff_cache .mypy_cache htmlcov .coverage
