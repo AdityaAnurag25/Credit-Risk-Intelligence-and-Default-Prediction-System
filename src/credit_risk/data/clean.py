@@ -7,7 +7,7 @@ TARGET_STATUSES: tuple[str, ...] = ("Fully Paid", "Charged Off")
 def clean_and_label(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
-    text_cols = df.select_dtypes(include=["object", "str"]).columns
+    text_cols = df.select_dtypes(include=["object"]).columns
     for col in text_cols:
         df[col] = df[col].astype(str).str.strip()
 

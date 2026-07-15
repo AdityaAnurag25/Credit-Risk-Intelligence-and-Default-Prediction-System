@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import matplotlib
@@ -10,11 +11,38 @@ import pandas as pd
 import shap
 from sklearn.pipeline import Pipeline
 
+logger = logging.getLogger(__name__)
+
 
 def _tree_estimator(model):
     """Return the tree-ensemble estimator inside `model`, or None if it isn't one."""
     estimator = model.named_steps["model"] if isinstance(model, Pipeline) else model
     return estimator if hasattr(estimator, "feature_importances_") else None
+
+
+def top_feature_names(model, feature_names: list[str], n: int = 5) -> list[str]:
+    """Pick the `n` features `model` relies on most, by absolute importance/coefficient.
+
+    Reads `feature_importances_` (tree ensembles) or `coef_` (linear models), unwrapping
+    a `Pipeline`'s final step if needed. Falls back to the first `n` feature columns,
+    with a warning, if neither is available.
+    """
+    estimator = model.named_steps["model"] if isinstance(model, Pipeline) else model
+
+    if hasattr(estimator, "feature_importances_"):
+        importances = np.abs(estimator.feature_importances_)
+    elif hasattr(estimator, "coef_"):
+        importances = np.abs(np.ravel(estimator.coef_))
+    else:
+        logger.warning(
+            "Model exposes neither feature_importances_ nor coef_; using the first %d "
+            "feature columns instead of the most important ones.",
+            n,
+        )
+        return list(feature_names[:n])
+
+    top_positions = np.argsort(importances)[::-1][:n]
+    return [feature_names[i] for i in top_positions]
 
 
 def _explain(model, X: pd.DataFrame, background: pd.DataFrame | None = None) -> shap.Explanation:

@@ -1,4 +1,4 @@
-.PHONY: install lint format test train evaluate explain clean
+.PHONY: install lint format test train evaluate explain mlflow-ui clean
 
 MODEL ?= xgboost
 MODEL_PATH ?=
@@ -23,6 +23,9 @@ evaluate:
 
 explain:
 	uv run python scripts/explain.py --model-path $(MODEL_PATH)
+
+mlflow-ui:
+	uv run mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
 
 clean:
 	find . -type d -name "__pycache__" -not -path "./.venv/*" -not -path "./venv/*" -exec rm -rf {} +

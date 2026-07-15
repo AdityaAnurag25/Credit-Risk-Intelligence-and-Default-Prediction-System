@@ -23,5 +23,9 @@ class Settings(BaseSettings):
     target_column: str = "target_default"
     issue_date_column: str = "issue_d"
 
+    mlflow_tracking_uri: str = f"sqlite:///{project_root / 'mlflow.db'}"
+    mlflow_experiment_name: str = "credit_risk_pd"
+    mlflow_registered_model_name: str = "credit_risk_pd_model"
+
 
 settings = Settings()
