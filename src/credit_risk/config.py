@@ -27,5 +27,11 @@ class Settings(BaseSettings):
     mlflow_experiment_name: str = "credit_risk_pd"
     mlflow_registered_model_name: str = "credit_risk_pd_model"
 
+    category_vocab_path: Path = project_root / "outputs" / "models" / "category_vocab.json"
+    feature_defaults_path: Path = project_root / "outputs" / "models" / "feature_defaults.json"
+
+    decision_approve_below: float = 0.20
+    decision_reject_above: float = 0.50
+
 
 settings = Settings()

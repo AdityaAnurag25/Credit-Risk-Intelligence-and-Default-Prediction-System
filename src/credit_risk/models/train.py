@@ -1,4 +1,5 @@
 import contextlib
+import json
 import logging
 from datetime import UTC, datetime
 
@@ -26,6 +27,24 @@ logger = logging.getLogger(__name__)
 
 TOP_N_FEATURES_FOR_PSI = 5
 SHAP_SAMPLE_SIZE = 1000
+
+# Raw categorical columns exposed on the API's LoanApplication schema (the
+# application-time subset of the model's features — see credit_risk.api.schemas).
+# Their possible values come from the dataset, not a fixed code list, so — unlike
+# the pd.cut/pd.qcut bucket columns in credit_risk.features.engineering — a
+# vocabulary snapshot has to be persisted at training time for the API to encode
+# them consistently with what LabelEncoder saw during training.
+API_CATEGORICAL_FIELDS: tuple[str, ...] = (
+    "term",
+    "grade",
+    "sub_grade",
+    "emp_length",
+    "home_ownership",
+    "verification_status",
+    "purpose",
+    "initial_list_status",
+    "application_type",
+)
 
 # Mirrors notebooks/05_model_training.ipynb cell dc2cadd3 exactly. This is
 # today's leakage exposure, not a corrected one — a full leakage audit is separate follow-up work.
@@ -176,6 +195,18 @@ def _model_config(model) -> dict[str, str]:
     return {f"model_param_{key}": str(value) for key, value in estimator.get_params().items()}
 
 
+def _category_vocabulary(df: pd.DataFrame, columns: tuple[str, ...]) -> dict[str, list[str]]:
+    """Snapshot the sorted-unique vocabulary LabelEncoder would fit for each column.
+
+    `prepare_model_matrix` fits a fresh `LabelEncoder` on every call rather than
+    persisting one, so there's nothing the serving API can load to reproduce a
+    category's training-time integer code. This reproduces `LabelEncoder`'s own
+    `classes_ = sorted(unique(values))` logic (after the same NaN -> "unknown" fill
+    `prepare_model_matrix` applies) so the API can look up the same code by position.
+    """
+    return {col: sorted(df[col].fillna("unknown").astype(str).unique().tolist()) for col in columns}
+
+
 def run_training(
     model_name: str,
     data_path: str,
@@ -215,6 +246,11 @@ def run_training(
     logger.info("Building features on %d rows", len(df))
     df = build_features(df)
 
+    vocab = _category_vocabulary(df, API_CATEGORICAL_FIELDS)
+    settings.category_vocab_path.parent.mkdir(parents=True, exist_ok=True)
+    settings.category_vocab_path.write_text(json.dumps(vocab, indent=2))
+    logger.info("Saved category vocabulary to %s", settings.category_vocab_path)
+
     split = time_based_split(
         df, date_column=settings.issue_date_column, train_frac=train_frac, val_frac=val_frac
     )
@@ -232,6 +268,17 @@ def run_training(
     X_train, y_train = X.loc[split.train_index], y.loc[split.train_index]
     X_val, y_val = X.loc[split.val_index], y.loc[split.val_index]
     X_test, y_test = X.loc[split.test_index], y.loc[split.test_index]
+
+    # Per-column training median, in prepare_model_matrix's already-encoded space (so
+    # this doubles as the correct default for LabelEncoded categorical columns too, not
+    # just numeric ones — reusing its encoding rather than reimplementing LabelEncoder's
+    # class-to-code mapping). This is what the serving API fills in for the ~90 model
+    # columns a loan application doesn't realistically cover (bureau-report detail,
+    # joint-applicant fields, free text) — see credit_risk.api.features.
+    feature_defaults = X_train.median().to_dict()
+    settings.feature_defaults_path.parent.mkdir(parents=True, exist_ok=True)
+    settings.feature_defaults_path.write_text(json.dumps(feature_defaults, indent=2))
+    logger.info("Saved feature defaults to %s", settings.feature_defaults_path)
 
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
     mlflow.set_experiment(settings.mlflow_experiment_name)
@@ -260,6 +307,8 @@ def run_training(
                 **_model_config(model),
             }
         )
+        mlflow.log_artifact(str(settings.category_vocab_path))
+        mlflow.log_artifact(str(settings.feature_defaults_path))
 
         logger.info("Evaluating on %d holdout rows", len(X_test))
         metrics = evaluate(model, X_test, y_test)

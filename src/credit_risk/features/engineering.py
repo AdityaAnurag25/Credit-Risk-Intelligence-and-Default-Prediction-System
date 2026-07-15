@@ -1,5 +1,27 @@
 import pandas as pd
 
+# Fixed label vocabularies for the pd.cut/pd.qcut bucket columns below. Extracted as
+# constants (rather than inline `labels=` literals) so the serving API can reproduce
+# the same category-to-integer encoding LabelEncoder assigns at training time without
+# needing a persisted encoder for these — the labels never change independently of
+# this code.
+REVOL_UTIL_BUCKET_LABELS: list[str] = ["low", "moderate", "high", "very_high"]
+DTI_BUCKET_LABELS: list[str] = ["low_dti", "moderate_dti", "high_dti", "very_high_dti"]
+EMPLOYMENT_STABILITY_LABELS: list[str] = ["new", "short_term", "medium_term", "long_term"]
+INQUIRY_RISK_BUCKET_LABELS: list[str] = [
+    "low_inquiry",
+    "moderate_inquiry",
+    "high_inquiry",
+    "very_high_inquiry",
+]
+DELINQUENCY_RISK_LABELS: list[str] = [
+    "no_delinquency",
+    "low_delinquency",
+    "moderate_delinquency",
+    "high_delinquency",
+]
+LOAN_SIZE_BUCKET_LABELS: list[str] = ["small", "medium", "large", "very_large"]
+
 
 def add_income_to_loan_ratio(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -12,7 +34,7 @@ def add_revol_util_bucket(df: pd.DataFrame) -> pd.DataFrame:
     df["revol_util_bucket"] = pd.cut(
         df["revol_util"],
         bins=[0, 30, 60, 90, 150],
-        labels=["low", "moderate", "high", "very_high"],
+        labels=REVOL_UTIL_BUCKET_LABELS,
     )
     return df
 
@@ -22,7 +44,7 @@ def add_dti_bucket(df: pd.DataFrame) -> pd.DataFrame:
     df["dti_bucket"] = pd.cut(
         df["dti"],
         bins=[0, 10, 20, 30, 100],
-        labels=["low_dti", "moderate_dti", "high_dti", "very_high_dti"],
+        labels=DTI_BUCKET_LABELS,
     )
     return df
 
@@ -37,7 +59,7 @@ def add_employment_stability(df: pd.DataFrame) -> pd.DataFrame:
     df["employment_stability"] = pd.cut(
         df["emp_length_clean"],
         bins=[-1, 1, 5, 10, 50],
-        labels=["new", "short_term", "medium_term", "long_term"],
+        labels=EMPLOYMENT_STABILITY_LABELS,
     )
     return df
 
@@ -57,7 +79,7 @@ def add_inquiry_risk_bucket(df: pd.DataFrame) -> pd.DataFrame:
     df["inquiry_risk_bucket"] = pd.cut(
         df["inq_last_6mths"],
         bins=[-1, 1, 3, 6, 100],
-        labels=["low_inquiry", "moderate_inquiry", "high_inquiry", "very_high_inquiry"],
+        labels=INQUIRY_RISK_BUCKET_LABELS,
     )
     return df
 
@@ -67,7 +89,7 @@ def add_delinquency_risk(df: pd.DataFrame) -> pd.DataFrame:
     df["delinquency_risk"] = pd.cut(
         df["delinq_2yrs"],
         bins=[-1, 0, 2, 5, 100],
-        labels=["no_delinquency", "low_delinquency", "moderate_delinquency", "high_delinquency"],
+        labels=DELINQUENCY_RISK_LABELS,
     )
     return df
 
@@ -77,7 +99,7 @@ def add_loan_size_bucket(df: pd.DataFrame) -> pd.DataFrame:
     df["loan_size_bucket"] = pd.qcut(
         df["loan_amnt"],
         q=4,
-        labels=["small", "medium", "large", "very_large"],
+        labels=LOAN_SIZE_BUCKET_LABELS,
     )
     return df
 
