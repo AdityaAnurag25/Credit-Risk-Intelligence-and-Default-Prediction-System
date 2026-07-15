@@ -1,0 +1,41 @@
+services:
+  api:
+    image: credit-risk-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_UID: ${UID:-1000}
+        APP_GID: ${GID:-1000}
+    ports:
+      - "8000:8000"
+    volumes:
+      # MLflow's local sqlite backend and file-based artifact store aren't baked
+      # into the image (see .dockerignore) — mount the host's so the lifespan
+      # handler can load the champion model. mlflow.db records its local artifact
+      # store's location as an absolute host path, so mlruns has to be mounted at
+      # that same path inside the container (not remapped under /app) for it to
+      # resolve — and read-write, since loading a registered model writes a small
+      # provenance sidecar file back into the artifact directory. PROJECT_ROOT is
+      # set by `make compose-up`; use that target rather than `docker compose up`
+      # directly.
+      - ./mlflow.db:/app/mlflow.db:ro
+      - ${PROJECT_ROOT}/mlruns:${PROJECT_ROOT}/mlruns
+      - ./outputs/models:/app/outputs/models:ro
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: credit_risk
+      POSTGRES_PASSWORD: credit_risk
+      POSTGRES_DB: credit_risk
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
