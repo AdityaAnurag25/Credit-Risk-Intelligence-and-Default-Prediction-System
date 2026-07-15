@@ -24,10 +24,12 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 ```bash
 uv sync
 uv run nbstripout --install
+uv run pre-commit install
 ```
 
 (`make install` runs the first step. The second is a one-time local git filter that strips notebook outputs
-before they're committed — run it once per clone.)
+before they're committed — run it once per clone. The third installs the pre-commit hooks — ruff, end-of-file
+and trailing-whitespace fixers, a large-file check, and nbstripout — so they run automatically on `git commit`.)
 
 Run `make test` to verify the install.
 

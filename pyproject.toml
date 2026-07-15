@@ -33,6 +33,7 @@ dev = [
     "seaborn>=0.13.2",
     "nbstripout>=0.9.1",
     "httpx>=0.28.1",
+    "pre-commit>=4.6.0",
 ]
 
 [build-system]

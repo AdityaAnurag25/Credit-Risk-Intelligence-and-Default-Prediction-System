@@ -35,4 +35,3 @@ FROM fact_loans
 GROUP BY dti_segment
 
 ORDER BY default_rate DESC;
-
