@@ -105,6 +105,7 @@ Thumbs.db
 # Coverage / Testing
 # --------------------------------------------------
 .coverage
+coverage.xml
 htmlcov/
 .pytest_cache/
 
