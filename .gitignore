@@ -71,6 +71,11 @@ outputs/monitoring/*
 *.joblib
 *.h5
 
+# Champion model artifact is committed so the API/dashboard can load it
+# without an MLflow tracking backend available (e.g. Streamlit Community Cloud).
+!models/champion.joblib
+!models/champion_metadata.json
+
 # --------------------------------------------------
 # Database Files
 # --------------------------------------------------

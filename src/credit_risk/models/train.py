@@ -2,6 +2,7 @@ import contextlib
 import json
 import logging
 from datetime import UTC, datetime
+from pathlib import Path
 
 import joblib
 import mlflow
@@ -193,6 +194,58 @@ def _model_config(model) -> dict[str, str]:
     """Flatten a fitted model's hyperparameters into an MLflow-loggable string dict."""
     estimator = model.named_steps["model"] if isinstance(model, Pipeline) else model
     return {f"model_param_{key}": str(value) for key, value in estimator.get_params().items()}
+
+
+def export_champion_artifact(
+    model,
+    *,
+    version: str,
+    feature_names: list[str],
+    test_auc: float,
+    test_ks: float,
+    test_gini: float,
+    brier: float,
+) -> Path:
+    """Dump the calibrated champion model to models/champion.joblib with metadata.
+
+    Lets the serving API and dashboard load the champion without an MLflow
+    tracking backend available, e.g. on Streamlit Community Cloud.
+
+    Args:
+        model: The fitted, calibrated champion model.
+        version: The MLflow registered model version.
+        feature_names: Ordered list of feature columns the model expects.
+        test_auc: ROC-AUC on the test vintage.
+        test_ks: KS statistic on the test vintage.
+        test_gini: Gini coefficient on the test vintage.
+        brier: Brier score of the calibrated model on the test vintage.
+
+    Returns:
+        Path to the written `champion.joblib` file.
+    """
+    settings.models_dir.mkdir(parents=True, exist_ok=True)
+
+    model_path = settings.models_dir / "champion.joblib"
+    joblib.dump(model, model_path)
+
+    metadata = {
+        "model_version": version,
+        "training_date": datetime.now(UTC).isoformat(),
+        "feature_names": feature_names,
+        "test_auc": test_auc,
+        "test_ks": test_ks,
+        "test_gini": test_gini,
+        "brier": brier,
+        "decision_thresholds": {
+            "approve_below": settings.decision_approve_below,
+            "reject_above": settings.decision_reject_above,
+        },
+    }
+    metadata_path = settings.models_dir / "champion_metadata.json"
+    metadata_path.write_text(json.dumps(metadata, indent=2))
+
+    logger.info("Exported champion model to %s", model_path)
+    return model_path
 
 
 def _category_vocabulary(df: pd.DataFrame, columns: tuple[str, ...]) -> dict[str, list[str]]:
@@ -413,6 +466,16 @@ def run_training(
                 "Registered %s v%s as 'champion'",
                 settings.mlflow_registered_model_name,
                 registered.version,
+            )
+
+            export_champion_artifact(
+                calibrated_model,
+                version=str(registered.version),
+                feature_names=list(X_train.columns),
+                test_auc=metrics["roc_auc"],
+                test_ks=metrics["ks_statistic"],
+                test_gini=metrics["gini_coefficient"],
+                brier=brier_calibrated,
             )
 
     return metrics
