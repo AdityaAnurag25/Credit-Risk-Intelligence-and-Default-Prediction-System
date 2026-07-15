@@ -47,7 +47,37 @@ split:
 make evaluate MODEL_PATH=outputs/models/xgboost_<timestamp>.pkl
 ```
 
-Model performance: TBD (Phase 2 leakage audit in progress).
+## Model Performance
+
+XGBoost, evaluated on a chronological holdout of `issue_d` (train: 2007-06 to 2016-03, validation: 2016-03
+to 2017-01, test: 2017-01 to 2018-12), after removing all identified leakage columns:
+
+| Metric | Value |
+|---|---|
+| Test ROC-AUC | 0.718 |
+| Test KS statistic | 0.313 |
+| Test Gini coefficient | 0.436 |
+| Brier score, raw → isotonic-calibrated | 0.225 → 0.150 |
+
+Performance is stable (~0.70–0.73 AUC) across 2017 through mid-2018 vintages, then degrades sharply in the
+final months of 2018 — this tracks label immaturity near the data cutoff (defaults take 12–18+ months to
+materialize, so the most recent vintages' "Charged Off" labels are a biased, fast-defaulter-only sample),
+not a real drop in model quality. See `outputs/figures/calibration_xgboost.png` for the reliability diagram
+and `outputs/figures/shap_summary.png` for global feature attribution.
+
+### Modelling Notes
+
+- **Leakage handling:** drops 35 post-origination/servicing columns (`total_pymnt`, `recoveries`,
+  `out_prncp`, the `hardship_*` and `settlement_*` families, `funded_amnt`, etc. — see
+  `src/credit_risk/data/leakage.py`) before feature engineering. This is what took the reported AUC from a
+  leakage-inflated ~0.82 down to the honest ~0.72 above.
+- **Time-based split:** train/val/test are chronological slices of `issue_d` (70/15/15), not a random split
+  — a random split lets the model see future vintages during training, which doesn't match deployment.
+- **Class imbalance:** XGBoost uses `scale_pos_weight` computed from the train-set class ratio; Logistic
+  Regression uses `class_weight="balanced"`. No SMOTE.
+- **Calibration:** isotonic regression fit on the validation vintage (`CalibratedClassifierCV` +
+  `FrozenEstimator`), evaluated by Brier score on the test set — the source of the 0.225 → 0.150 improvement
+  above.
 
 ## Project Structure
 
