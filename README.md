@@ -95,6 +95,29 @@ and `outputs/figures/shap_summary.png` for global feature attribution.
   `FrozenEstimator`), evaluated by Brier score on the test set — the source of the 0.225 → 0.150 improvement
   above.
 
+## Deployment
+
+**Live dashboard:** <TBD>
+
+The Streamlit dashboard (`src/credit_risk/dashboard/app.py`, entrypoint `streamlit_app.py`) scores a single
+loan application against the committed champion model — `models/champion.joblib` plus
+`models/champion_metadata.json`, `models/category_vocab.json`, and `models/feature_defaults.json`, all
+produced by `make train` (see `export_champion_artifact` / `export_serving_encoders` in
+`src/credit_risk/models/train.py`). It doesn't connect to MLflow, PostgreSQL, or any other service, so it
+runs on Streamlit Community Cloud from nothing but a `git clone`.
+
+To deploy:
+
+1. Push this repo to GitHub, with `models/champion.joblib` and its companion files committed.
+2. On [Streamlit Community Cloud](https://streamlit.io/cloud), create a new app and point it at this repo.
+3. Set the entrypoint to `streamlit_app.py`.
+4. Deploy. Community Cloud installs from `requirements.txt` — auto-generated from `pyproject.toml`; see the
+   comment at the top of that file for how to regenerate it after a dependency change.
+
+The FastAPI service (`make serve`) is a separate deployment target, designed for local or containerized use
+(Docker / Docker Compose, backed by a live MLflow registry) rather than Community Cloud — see
+[`docs/RUNBOOK.md`](docs/RUNBOOK.md) for how to run it end to end.
+
 ## Project Structure
 
 ```

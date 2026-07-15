@@ -1,4 +1,4 @@
-.PHONY: install lint format test train evaluate explain mlflow-ui serve monitor docker-build docker-run compose-up compose-down clean
+.PHONY: install lint format test train evaluate explain export-champion mlflow-ui serve monitor docker-build docker-run compose-up compose-down clean
 
 MODEL ?= xgboost
 MODEL_PATH ?=
@@ -24,6 +24,9 @@ evaluate:
 
 explain:
 	uv run python scripts/explain.py --model-path $(MODEL_PATH)
+
+export-champion:
+	uv run python scripts/export_champion.py
 
 mlflow-ui:
 	uv run mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000

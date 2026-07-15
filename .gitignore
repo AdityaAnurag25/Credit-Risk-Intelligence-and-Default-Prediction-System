@@ -19,6 +19,11 @@ env/
 .env
 
 # --------------------------------------------------
+# Streamlit secrets (.streamlit/secrets.toml.example is the committed template)
+# --------------------------------------------------
+.streamlit/secrets.toml
+
+# --------------------------------------------------
 # Jupyter Notebook
 # --------------------------------------------------
 .ipynb_checkpoints/
@@ -70,6 +75,13 @@ outputs/monitoring/*
 *.pkl
 *.joblib
 *.h5
+
+# Champion model artifact is committed so the API/dashboard can load it
+# without an MLflow tracking backend available (e.g. Streamlit Community Cloud).
+# models/category_vocab.json and models/feature_defaults.json (also written by
+# export_serving_encoders()) need no exception here — nothing above ignores *.json.
+!models/champion.joblib
+!models/champion_metadata.json
 
 # --------------------------------------------------
 # Database Files
