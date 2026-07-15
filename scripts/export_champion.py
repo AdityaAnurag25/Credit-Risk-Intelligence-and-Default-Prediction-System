@@ -4,7 +4,7 @@ import mlflow
 import mlflow.sklearn
 
 from credit_risk.config import settings
-from credit_risk.models.train import export_champion_artifact
+from credit_risk.models.train import export_champion_artifact, export_serving_encoders
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -40,6 +40,11 @@ def main() -> None:
         test_gini=run.data.metrics["gini_coefficient"],
         brier=run.data.metrics["brier_score_calibrated"],
     )
+
+    # Assumes outputs/models/{category_vocab,feature_defaults}.json on disk still
+    # match this champion's run — true right after training, but stale if other
+    # trainings ran since. Same assumption the local/Docker API already makes.
+    export_serving_encoders()
 
 
 if __name__ == "__main__":

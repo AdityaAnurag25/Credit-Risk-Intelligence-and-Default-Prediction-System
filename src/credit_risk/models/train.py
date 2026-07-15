@@ -1,6 +1,7 @@
 import contextlib
 import json
 import logging
+import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -248,6 +249,21 @@ def export_champion_artifact(
     return model_path
 
 
+def export_serving_encoders() -> None:
+    """Copy the category vocabulary and feature defaults into models/, alongside champion.joblib.
+
+    `run_training` always (re)writes these to `settings.category_vocab_path` /
+    `settings.feature_defaults_path` (under the gitignored `outputs/models/`), which
+    the local/Docker API reads via a volume mount. Streamlit Community Cloud has no
+    volume mounts — just a `git clone` — so the dashboard needs its own committed copy
+    to encode form inputs the same way the model saw them at training time.
+    """
+    settings.models_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy(settings.category_vocab_path, settings.models_dir / "category_vocab.json")
+    shutil.copy(settings.feature_defaults_path, settings.models_dir / "feature_defaults.json")
+    logger.info("Copied category vocabulary and feature defaults into %s", settings.models_dir)
+
+
 def _category_vocabulary(df: pd.DataFrame, columns: tuple[str, ...]) -> dict[str, list[str]]:
     """Snapshot the sorted-unique vocabulary LabelEncoder would fit for each column.
 
@@ -477,5 +493,6 @@ def run_training(
                 test_gini=metrics["gini_coefficient"],
                 brier=brier_calibrated,
             )
+            export_serving_encoders()
 
     return metrics
