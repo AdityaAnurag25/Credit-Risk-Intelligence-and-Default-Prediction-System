@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "pandas>=3.0",
-    "numpy>=2.4",
+    "numpy>=2.4,<2.5",
     "scikit-learn>=1.8",
     "xgboost>=3.2",
     "sqlalchemy>=2.0",
@@ -15,6 +15,7 @@ dependencies = [
     "pydantic-settings>=2.6",
     "python-dotenv>=1.0",
     "joblib>=1.5.3",
+    "shap>=0.51.0",
 ]
 
 [dependency-groups]
@@ -46,4 +47,4 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM"]
 
 [tool.ruff.lint.pep8-naming]
 # X / y is sklearn's own convention (fit(X, y), predict(X), ...), not a naming mistake.
-extend-ignore-names = ["X", "X_train", "X_val", "X_test"]
+extend-ignore-names = ["X", "X_train", "X_val", "X_test", "X_sample"]

@@ -1,4 +1,4 @@
-.PHONY: install lint format test train evaluate clean
+.PHONY: install lint format test train evaluate explain clean
 
 MODEL ?= xgboost
 MODEL_PATH ?=
@@ -20,6 +20,9 @@ train:
 
 evaluate:
 	uv run python scripts/evaluate.py --model-path $(MODEL_PATH)
+
+explain:
+	uv run python scripts/explain.py --model-path $(MODEL_PATH)
 
 clean:
 	find . -type d -name "__pycache__" -not -path "./.venv/*" -not -path "./venv/*" -exec rm -rf {} +

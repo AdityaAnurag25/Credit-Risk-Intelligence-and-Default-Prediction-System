@@ -6,6 +6,7 @@ from credit_risk.models.decision import (
     sweep_thresholds,
 )
 from credit_risk.models.evaluate import evaluate
+from credit_risk.models.explain import global_importance, local_explanation, save_shap_plots
 from credit_risk.models.train import compute_scale_pos_weight, prepare_model_matrix, train
 
 __all__ = [
@@ -15,8 +16,11 @@ __all__ = [
     "compute_scale_pos_weight",
     "evaluate",
     "fit_isotonic_calibration",
+    "global_importance",
+    "local_explanation",
     "plot_calibration_curve",
     "prepare_model_matrix",
+    "save_shap_plots",
     "sweep_thresholds",
     "train",
 ]
