@@ -110,3 +110,49 @@ make lint                                                         # ruff check
 ```
 
 See the main [README](../README.md) for what each of these does, and `Makefile` for the full target list.
+
+## 6. Recording the API demo
+
+For the FastAPI portfolio artifact — a short screen recording, not staged screenshots. Target length:
+60–90 seconds.
+
+**Tool:** [peek](https://github.com/phw/peek) if you're on Linux and want a GIF — records a window region,
+exports straight to `.gif`, no editing step. For a text-only cast that embeds directly in a README instead of
+a video/GIF file, use [asciinema](https://asciinema.org/) (`asciinema rec demo.cast`) — either embed the
+hosted player, or run it through [svg-term-cli](https://github.com/marionebl/svg-term-cli) for a static SVG
+with no JS dependency.
+
+Before hitting record, start the MLflow UI in a separate terminal so it's already loaded in a browser tab —
+`compose-up` doesn't start it:
+
+```bash
+make mlflow-ui
+```
+
+Then record, in order:
+
+```bash
+make compose-up
+curl http://localhost:8000/health
+curl -X POST http://localhost:8000/score \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loan_amnt": 15000, "term": "36 months", "int_rate": 13.5, "installment": 450.0,
+    "grade": "B", "sub_grade": "B3", "emp_length": "5 years", "home_ownership": "RENT",
+    "annual_inc": 65000, "verification_status": "Verified", "purpose": "debt_consolidation",
+    "dti": 18.5, "delinq_2yrs": 0, "earliest_cr_line": "Jan-2010", "inq_last_6mths": 1,
+    "open_acc": 8, "pub_rec": 0, "revol_bal": 12000, "revol_util": 45.0, "total_acc": 20,
+    "initial_list_status": "w", "application_type": "Individual"
+  }'
+```
+
+- Open `http://localhost:8000/docs` — the Swagger UI generated from `LoanApplication` / `ScoreResponse`
+  (`src/credit_risk/api/schemas.py`). Worth expanding `POST /score` on camera to show the schema.
+- Open `http://localhost:5000` — the MLflow UI tab from before recording. Click into the champion run to
+  show its logged params/metrics.
+
+Stop recording, then clean up off-camera:
+
+```bash
+make compose-down
+```

@@ -1,6 +1,7 @@
 # Credit Risk Intelligence & Default Prediction System
 
 [![CI](https://github.com/AdityaAnurag25/Credit-Risk-Intelligence-and-Default-Prediction-System/actions/workflows/ci.yml/badge.svg)](https://github.com/AdityaAnurag25/Credit-Risk-Intelligence-and-Default-Prediction-System/actions/workflows/ci.yml)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://credit-risk-intelligence-and-default-prediction-system-ifci7wa.streamlit.app/)
 
 An end-to-end credit risk pipeline built on LendingClub's historical consumer loan data. Raw loan-level
 records are cleaned, feature-engineered, and used to train Logistic Regression, Random Forest, and XGBoost
@@ -53,7 +54,7 @@ make evaluate MODEL_PATH=outputs/models/xgboost_<timestamp>.pkl
 
 ## Deployment
 
-**Live dashboard:** <TBD>
+**Live dashboard:** <https://credit-risk-intelligence-and-default-prediction-system-ifci7wa.streamlit.app/>
 
 ### Dashboard (Streamlit Community Cloud)
 
@@ -85,7 +86,13 @@ curl http://localhost:8000/health
 ```
 
 See [`docs/RUNBOOK.md`](docs/RUNBOOK.md) for the full local reproduction walkthrough (install → train →
-serve → score), with expected output at each step.
+serve → score) and the commands used to record the API demo.
+
+## Screenshots
+
+| Dashboard | FastAPI Swagger UI | MLflow UI |
+|---|---|---|
+| ![Dashboard overview](docs/screenshots/dashboard-overview.png) | ![API Swagger UI](docs/screenshots/api-swagger.png) | ![MLflow UI](docs/screenshots/mlflow-ui.png) |
 
 ## Model Performance
 
