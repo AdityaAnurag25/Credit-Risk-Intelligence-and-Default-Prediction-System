@@ -33,5 +33,9 @@ class Settings(BaseSettings):
     decision_approve_below: float = 0.20
     decision_reject_above: float = 0.50
 
+    reference_data_path: Path = project_root / "outputs" / "reference_data.parquet"
+    current_data_path: Path = project_root / "outputs" / "current_data.parquet"
+    drift_report_path: Path = project_root / "outputs" / "monitoring" / "drift_report.html"
+
 
 settings = Settings()

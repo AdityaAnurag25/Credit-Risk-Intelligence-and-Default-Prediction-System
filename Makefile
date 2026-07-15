@@ -1,4 +1,4 @@
-.PHONY: install lint format test train evaluate explain mlflow-ui serve docker-build docker-run compose-up compose-down clean
+.PHONY: install lint format test train evaluate explain mlflow-ui serve monitor docker-build docker-run compose-up compose-down clean
 
 MODEL ?= xgboost
 MODEL_PATH ?=
@@ -30,6 +30,9 @@ mlflow-ui:
 
 serve:
 	uv run uvicorn credit_risk.api.main:app --host 0.0.0.0 --port 8000
+
+monitor:
+	uv run python scripts/monitor.py
 
 docker-build:
 	docker build --build-arg APP_UID=$(shell id -u) --build-arg APP_GID=$(shell id -g) -t $(IMAGE) .
