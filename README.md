@@ -1,5 +1,7 @@
 # Credit Risk Intelligence & Default Prediction System
 
+[![CI](https://github.com/AdityaAnurag25/Credit-Risk-Intelligence-and-Default-Prediction-System/actions/workflows/ci.yml/badge.svg)](https://github.com/AdityaAnurag25/Credit-Risk-Intelligence-and-Default-Prediction-System/actions/workflows/ci.yml)
+
 An end-to-end credit risk pipeline built on LendingClub's historical consumer loan data. Raw loan-level
 records are cleaned, feature-engineered, and used to train Logistic Regression, Random Forest, and XGBoost
 classifiers that estimate probability of default. The reusable pipeline logic lives in `src/credit_risk/`;
@@ -48,6 +50,18 @@ split:
 ```bash
 make evaluate MODEL_PATH=outputs/models/xgboost_<timestamp>.pkl
 ```
+
+## Deployment
+
+```bash
+make docker-build
+make docker-run
+# or: make compose-up   (also starts a local Postgres — see docker-compose.yml)
+curl http://localhost:8000/health
+```
+
+See [`docs/RUNBOOK.md`](docs/RUNBOOK.md) for the full local reproduction walkthrough (install → train →
+serve → score), with expected output at each step.
 
 ## Model Performance
 
